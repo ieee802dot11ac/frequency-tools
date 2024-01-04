@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
+import gzip as gz
 import os
 import struct
 import sys
+import tempfile as tf
 import typing
 from dataclasses import dataclass
 
@@ -32,13 +34,23 @@ if len(sys.argv) == 1:
 	print("i can't unpack nothing")
 	exit()
 
-if len(sys.argv) == 2:
-	print("Dumping file", sys.argv[1], 'to _' + sys.argv[1][:-4])
 
 if len(sys.argv) == 3:
 	print("Dumping file", sys.argv[1], "to directory", sys.argv[2])
 
-file = open(sys.argv[1], "rb")
+if '.gz' in sys.argv[1]:
+	filename = sys.argv[1][:-3]
+	gzFile = gz.open(sys.argv[1])
+	file = tf.TemporaryFile()
+	file.write(gzFile.read())
+	file.seek(0, 0)
+else:
+	filename = sys.argv[1]
+	file = open(filename, "rb")
+
+if len(sys.argv) == 2:
+	print("Dumping file", sys.argv[1], 'to _' + filename[:-4])
+
 ver: int = struct.unpack_from("<I", file.read(4))[0]
 entryCt: int = struct.unpack_from("<I", file.read(4))[0]
 entries = [RndEntry("", "", 0) for h in range(entryCt)]
@@ -54,12 +66,12 @@ print("file ver:", ver, "\nfile entries:", entryCt, "\nrest of file length:", le
 if len(sys.argv) == 3 and os.path.exists(sys.argv[2]):
 	os.chdir(sys.argv[2])
 
-if len(sys.argv) == 2 and not os.path.exists(sys.argv[1][:-4]):
+if len(sys.argv) == 2 and not os.path.exists(filename[:-4]):
 	try:
-		 os.mkdir("_" + sys.argv[1][:-4])
-		 os.chdir("_" + sys.argv[1][:-4])
+		 os.mkdir("_" + filename[:-4])
+		 os.chdir("_" + filename[:-4])
 	except:
-		os.chdir("_" + sys.argv[1][:-4])
+		os.chdir("_" + filename[:-4])
 
 if len(entries) != len(files) - 1:
 	print("SUPER BAD ERROR!!! CHUNK COUNT DOES NOT MATCH ENTRY COUNT!!!")
