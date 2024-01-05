@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+import utils
 import gzip as gz
 import os
 import struct
@@ -8,16 +8,6 @@ import tempfile as tf
 import typing
 from dataclasses import dataclass
 
-def readUntilNull(file) -> str:
-	ret = b""
-	c = b' '
-	while True:
-		c = bytes(file.read(1))
-		if c == b'\0':
-			break
-		ret += c
-	return str(ret)[2:-1]
-
 @dataclass
 class RndEntry:
 	ftype: str
@@ -25,64 +15,72 @@ class RndEntry:
 	unk_bool: bool
 
 	def Load(self, file):
-		self.ftype = readUntilNull(file)
-		self.fname = readUntilNull(file)
+		self.ftype = utils.readUntilNull(file)
+		self.fname = utils.readUntilNull(file)
 		self.unk_bool = file.read(1)
 		print("new file of type", self.ftype, "named", self.fname, "with unk_bool of", self.unk_bool)
 
-if len(sys.argv) == 1:
-	print("i can't unpack nothing")
-	exit()
+@dataclass
+class RndFile:
+	ver: int
+	entryCt: int
+	entries: list[RndEntry]
+	files: list[bytes]
 
+	def LoadRndFile(self, file, diag: bool):
+		self.ver = struct.unpack_from("<I", file.read(4))[0]
+		self.entryCt = struct.unpack_from("<I", file.read(4))[0]
+		self.entries = [RndEntry("", "", 0) for h in range(self.entryCt)]
 
-if len(sys.argv) == 3:
-	print("Dumping file", sys.argv[1], "to directory", sys.argv[2])
+		for entry in self.entries:
+			entry.Load(file)
 
-if '.gz' in sys.argv[1]:
-	filename = sys.argv[1][:-3]
-	gzFile = gz.open(sys.argv[1])
-	file = tf.TemporaryFile()
-	file.write(gzFile.read())
-	file.seek(0, 0)
-else:
-	filename = sys.argv[1]
-	file = open(filename, "rb")
+		remainder = file.read()
+		self.files = remainder.split(b"\xAD\xDE\xAD\xDE")
 
-if len(sys.argv) == 2:
-	print("Dumping file", sys.argv[1], 'to _' + filename[:-4])
+		if (diag):
+			print("file ver:", self.ver, "\nfile entries:", self.entryCt, "\nrest of file length:", len(remainder))
 
-ver: int = struct.unpack_from("<I", file.read(4))[0]
-entryCt: int = struct.unpack_from("<I", file.read(4))[0]
-entries = [RndEntry("", "", 0) for h in range(entryCt)]
+	def WriteFilesToDir(self, dir: str) -> None:
+		if not os.path.exists(dir):
+			os.mkdir(dir)
 
-for entry in entries:
-	entry.Load(file)
+		os.chdir(dir)
 
-remainder = file.read()
-files = remainder.split(b"\xAD\xDE\xAD\xDE")
+		if len(self.entries) != len(self.files) - 1: # -1 to account for empty entry
+			print("SUPER BAD ERROR!!! CHUNK COUNT DOES NOT MATCH ENTRY COUNT!!!")
+			print("entries length:", len(self.entries), "\nfiles   length:", len(self.files))
+			exit()
 
-print("file ver:", ver, "\nfile entries:", entryCt, "\nrest of file length:", len(remainder))
+		i = 0
+		for entry in self.entries:
+			name = ""
+			if ('.' in entry.fname[:-8]): # 8 is a bit large, but it's probably fine
+				name = entry.fname
+			else:
+				name = entry.fname + "." + entry.ftype.lower()
+			outFile = open(name, "wb")
+			outFile.write(self.files[i])
+			i += 1
 
-if len(sys.argv) == 3 and os.path.exists(sys.argv[2]):
-	os.chdir(sys.argv[2])
+if __name__ == "__main__":
+	if len(sys.argv) == 1:
+		print("i can't unpack nothing")
+		exit()
 
-if len(sys.argv) == 2 and not os.path.exists(filename[:-4]):
-	try:
-		 os.mkdir("_" + filename[:-4])
-		 os.chdir("_" + filename[:-4])
-	except:
-		os.chdir("_" + filename[:-4])
+	if len(sys.argv) == 2:
+		if '.gz' in sys.argv[1]:
+			filename = sys.argv[1][:-3]
+		else:
+			filename = sys.argv[1]
+		print("Dumping file", sys.argv[1], "to directory _" + filename)
+		outdir = "_" + filename[:-4]
 
-if len(entries) != len(files) - 1:
-	print("SUPER BAD ERROR!!! CHUNK COUNT DOES NOT MATCH ENTRY COUNT!!!")
-	print("entries length:", len(entries), "files length:", len(files))
-	exit()
+	if len(sys.argv) == 3:
+		print("Dumping file", sys.argv[1], "to directory", sys.argv[2])
+		outdir = sys.argv[2]
 
-for i in range(entryCt):
-	name = ""
-	if ('.' in entries[i].fname):
-		name = entries[i].fname
-	else:
-		name = entries[i].fname + "." + entries[i].ftype.lower()
-	outFile = open(name, "wb")
-	outFile.write(files[i])
+	file = utils.OpenOptionallyCompressed(sys.argv[1])
+	rnd = RndFile(0, 0, [RndEntry("","",False)], [b""])
+	rnd.LoadRndFile(file, True)
+	rnd.WriteFilesToDir(outdir)
