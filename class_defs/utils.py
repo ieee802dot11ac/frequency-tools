@@ -1,3 +1,4 @@
+import tempfile as tmp
 def readUntilNull(file) -> str:
 	ret = b""
 	c = b' '
@@ -12,7 +13,7 @@ def OpenOptionallyCompressed(name: str):
 	if '.gz' in name:
 		filename = name[:-3]
 		gzFile = gz.open(name)
-		file = tf.TemporaryFile()
+		file = tmp.TemporaryFile()
 		file.write(gzFile.read())
 		file.seek(0, 0)
 	else:

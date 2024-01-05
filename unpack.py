@@ -1,12 +1,11 @@
 #!/usr/bin/python3
-import utils
 import gzip as gz
 import os
 import struct
 import sys
-import tempfile as tf
 import typing
 from dataclasses import dataclass
+from class_defs import utils
 
 @dataclass
 class RndEntry:
