@@ -43,18 +43,36 @@ class Vertex:
 	def __init__(self, file):
 		test = file.read(12)
 		self.x, self.y, self.z = struct.unpack("<3f", test)
-		if abs(self.x) > 0 and abs(self.x) < 0.00001:
+		if abs(self.x) > 0 and abs(self.x) < 0.00001: # hopefully avoid weird errors with absurd precision
 			self.x = 0
-		elif abs(self.y) > 0 and abs(self.y) < 0.00001:
+		if abs(self.y) > 0 and abs(self.y) < 0.00001:
 			self.y = 0
-		elif abs(self.z) > 0 and abs(self.z) < 0.00001:
+		if abs(self.z) > 0 and abs(self.z) < 0.00001:
 			self.z = 0
 		test = file.read(12)
 		self.nx, self.ny, self.nz = struct.unpack("<3f", test)
+		if abs(self.nx) > 0 and abs(self.nx) < 0.00001:
+			self.nx = 0
+		if abs(self.ny) > 0 and abs(self.ny) < 0.00001:
+			self.ny = 0
+		if abs(self.nz) > 0 and abs(self.nz) < 0.00001:
+			self.nz = 0
 		test = file.read(8)
 		self.u, self.v = struct.unpack("<2f", test)
+		if abs(self.u) > 0 and abs(self.u) < 0.00001:
+			self.u = 0
+		if abs(self.v) > 0 and abs(self.v) < 0.00001:
+			self.v = 0
 		test = file.read(16)
 		self.weight_0, self.weight_1, self.weight_2, self.weight_3 = struct.unpack("<4f", test)
+		if abs(self.weight_0) > 0 and abs(self.weight_0) < 0.00001:
+			self.weight_0 = 0
+		if abs(self.weight_1) > 0 and abs(self.weight_1) < 0.00001:
+			self.weight_1 = 0
+		if abs(self.weight_2) > 0 and abs(self.weight_2) < 0.00001:
+			self.weight_2 = 0
+		if abs(self.weight_3) > 0 and abs(self.weight_3) < 0.00001:
+			self.weight_3 = 0
 		test = file.read(8)
 		print(test, file.tell())
 		self.bone_0, self.bone_1, self.bone_2, self.bone_3 = struct.unpack("<4h", test)
