@@ -14,4 +14,4 @@ class Drawable:
         self.ver = struct.unpack("<I", file.read(4))
         self.showing = struct.unpack("<B", file.read(1))
         self.draw_ct = struct.unpack("<I", file.read(4))[0]
-        self.draws = [readUntilNull(file) for i in range(self.draw_ct)]
+        self.draws = [utils.readUntilNull(file) for i in range(self.draw_ct)]

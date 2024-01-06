@@ -29,9 +29,13 @@ if __name__ == "__main__":
         outfile.write("vt " + str(vert.u) + " " + str(vert.v))
         outfile.write("\n")
         
-    
-    for face in mesh.faces:
-        outfile.write("f " + str(face.idx0) + "/" + str(face.idx0) + "/" + str(face.idx0) + " "\
-             + str(face.idx1) + "/" + str(face.idx1) + "/" + str(face.idx1)\
-             + " " + str(face.idx2) + "/" + str(face.idx2) + "/" + str(face.idx2))
+    outfile.write("v 0 0 0\nvn 0 0 0\nvt 0 0\n") # fix a weird blender bug where it doesn't acknowledge the last vert
+
+    for face in mesh.faces: # this is in 2/1/0 because i'm pretty sure obj expects a different spin than freq
+        idx0 = face.idx0 + 1
+        idx1 = face.idx1 + 1
+        idx2 = face.idx2 + 1
+        outfile.write("f " + str(idx0) + "/" + str(idx0) + "/" + str(idx0) + " "\
+             + str(idx1) + "/" + str(idx1) + "/" + str(idx1)\
+             + " " + str(idx2) + "/" + str(idx2) + "/" + str(idx2))
         outfile.write("\n")

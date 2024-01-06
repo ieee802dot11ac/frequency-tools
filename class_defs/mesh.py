@@ -43,6 +43,9 @@ class Vertex:
 	def __init__(self, file):
 		test = file.read(12)
 		self.x, self.y, self.z = struct.unpack("<3f", test)
+		self.x *= 20
+		self.y *= 20
+		self.z *= 20
 		if abs(self.x) > 0 and abs(self.x) < 0.00001: # hopefully avoid weird errors with absurd precision
 			self.x = 0
 		if abs(self.y) > 0 and abs(self.y) < 0.00001:
