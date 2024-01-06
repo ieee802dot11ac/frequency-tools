@@ -1,22 +1,17 @@
 import os # nonlocal imports
 import struct
 import typing
-from dataclasses import dataclass # from x imports
-import common_types as ct # local imports
-import drawable as dr
-import transform as tf
-import utils as ut
+from dataclasses import dataclass # "from _" imports
+from class_defs import common_types as ct # local imports
+from class_defs import drawable as dr
+from class_defs import transform as tf
+from class_defs import utils as ut
 
 @dataclass
 class Face:
 	idx0: int
 	idx1: int
 	idx2: int
-
-	def __init__(self):
-		self.idx0 = 0
-		self.idx1 = 0
-		self.idx2 = 0
 
 	def __init__(self, file):
 		self.idx0, self.idx1, self.idx2 = struct.unpack("<hhh", file.read(6))
@@ -46,34 +41,43 @@ class Vertex:
 	bone_3: int # short
 
 	def __init__(self, file):
-		x, y, z = struct.unpack("<3f", file.read(12))
-		nx, ny, nz = struct.unpack("<3f", file.read(12))
-		u, v = struct.unpack("<2f", file.read(8))
-		weight_0, weight_1, weight_2, weight_3 = struct.unpack("<4f", file.read(16))
-		bone_0, bone_1, bone_2, bone_3 = struct.unpack("<4I", file.read(16))
+		test = file.read(12)
+		self.x, self.y, self.z = struct.unpack("<3f", test)
+		if abs(self.x) > 0 and abs(self.x) < 0.00001:
+			self.x = 0
+		elif abs(self.y) > 0 and abs(self.y) < 0.00001:
+			self.y = 0
+		elif abs(self.z) > 0 and abs(self.z) < 0.00001:
+			self.z = 0
+		test = file.read(12)
+		self.nx, self.ny, self.nz = struct.unpack("<3f", test)
+		test = file.read(8)
+		self.u, self.v = struct.unpack("<2f", test)
+		test = file.read(16)
+		self.weight_0, self.weight_1, self.weight_2, self.weight_3 = struct.unpack("<4f", test)
+		test = file.read(8)
+		print(test, file.tell())
+		self.bone_0, self.bone_1, self.bone_2, self.bone_3 = struct.unpack("<4h", test)
 
-	def __init__(self):
-		# Coordinates
-		x = 0
-		y = 0
-		z = 0
-		# Normals
-		nx = 0
-		ny = 0
-		nz = 0
-		# UVs
-		u = 0
-		v = 0
-		# Weights
-		weight_0 = 0
-		weight_1 = 0
-		weight_2 = 0
-		weight_3 = 0
-		# Bone indices
-		bone_0 = 0
-		bone_1 = 0
-		bone_2 = 0
-		bone_3 = 0
+	@property
+	def pos(self):
+		return (self.x, self.y, self.z)
+
+	@property
+	def norm(self):
+		return (self.nx, self.ny, self.nz)
+
+	@property
+	def tex(self):
+		return (self.u, self.v)
+
+	@property
+	def weights(self):
+		return (self.weight_0, self.weight_1, self.weight_2, self.weight_3)
+
+	@property
+	def bones(self):
+		return (self.bone_0, self.bone_1, self.bone_2, self.bone_3)
 
 #struct FreqMesh {
 #	u32 version;
@@ -133,8 +137,8 @@ class RndMesh:
 		self.xfm = tf.Transform(file)
 		self.draw = dr.Drawable(file)
 		file.seek(4,1)
-		self.bone_ct = struct.unpack("<I", file.read(4))
-		self.bones = [ut.readUntilNull(file) for i in range(bone_ct)]
+		self.bone_ct = struct.unpack("<I", file.read(4))[0]
+		self.bones = [ut.readUntilNull(file) for i in range(self.bone_ct)]
 		self.zmode1 = struct.unpack("<I", file.read(4))
 		self.zmode2 = struct.unpack("<I", file.read(4))
 		self.mat = ut.readUntilNull(file)
@@ -145,14 +149,11 @@ class RndMesh:
 		self.trans2 = ut.readUntilNull(file)
 		self.sphere = ct.Sphere(file)
 		self.unk_str = ut.readUntilNull(file)
-		self.unk_flt = struct.unpack("<f", file.read(4))
+		self.unk_flt = struct.unpack("<f", file.read(4))[0]
 		self.unk_negone = struct.unpack("<I", file.read(4))
-		self.vert_ct = struct.unpack("<I", file.read(4))
-		self.verts = [Vertex(file) for j in range(vert_ct)]
-		self.face_ct = struct.unpack("<I", file.read(4))
-		self.faces = [Face(file) for k in range(face_ct)]
-		self.short_ct = struct.unpack("<I", file.read(4))
-		self.shorts = [struct.unpack("<h", file.read(2)) for l in range(2*short_ct)]
-
-
-
+		self.vert_ct = struct.unpack("<I", file.read(4))[0]
+		self.verts = [Vertex(file) for j in range(self.vert_ct)]
+		self.face_ct = struct.unpack("<I", file.read(4))[0]
+		self.faces = [Face(file) for k in range(self.face_ct)]
+		self.short_ct = struct.unpack("<I", file.read(4))[0]
+		self.shorts = [struct.unpack("<h", file.read(2)) for l in range(2*self.short_ct)]

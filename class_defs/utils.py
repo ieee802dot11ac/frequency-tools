@@ -1,4 +1,6 @@
+import os
 import tempfile as tmp
+import gzip as gz
 def readUntilNull(file) -> str:
 	ret = b""
 	c = b' '

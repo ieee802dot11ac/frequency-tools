@@ -1,7 +1,7 @@
 import struct
 import typing
 from dataclasses import dataclass
-import utils
+from class_defs import utils
 
 @dataclass
 class Drawable:
@@ -13,5 +13,5 @@ class Drawable:
     def __init__(self, file):
         self.ver = struct.unpack("<I", file.read(4))
         self.showing = struct.unpack("<B", file.read(1))
-        self.draw_ct = struct.unpack("<I", file.read(4))
-        self.draws = [readUntilNull(file) for i in range(draw_ct)]
+        self.draw_ct = struct.unpack("<I", file.read(4))[0]
+        self.draws = [readUntilNull(file) for i in range(self.draw_ct)]
