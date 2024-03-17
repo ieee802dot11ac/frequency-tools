@@ -2,7 +2,7 @@ import os
 import struct
 import typing
 from dataclasses import dataclass
-from class_defs import utils
+from .. class_defs import utils
 @dataclass
 class RndEntry:
 	ftype: str

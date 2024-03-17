@@ -2,10 +2,10 @@ import os # nonlocal imports
 import struct
 import typing
 from dataclasses import dataclass # "from _" imports
-from class_defs import common_types as ct # local imports
-from class_defs import drawable as dr
-from class_defs import transform as tf
-from class_defs import utils as ut
+from .. class_defs import common_types as ct # local imports
+from .. class_defs import drawable as dr
+from .. class_defs import transform as tf
+from .. class_defs import utils as ut
 
 @dataclass
 class Face:
@@ -14,7 +14,11 @@ class Face:
 	idx2: int
 
 	def __init__(self, file):
-		self.idx0, self.idx1, self.idx2 = struct.unpack("<hhh", file.read(6))
+		self.idx0, self.idx1, self.idx2 = struct.unpack("<3h", file.read(6))
+
+	@property
+	def as_tup(self):
+		return (self.idx0, self.idx1, self.idx2)
 
 @dataclass
 class Vertex:
@@ -45,10 +49,13 @@ class Vertex:
 		self.x, self.y, self.z = struct.unpack("<3f", test)
 		if abs(self.x) > 0 and abs(self.x) < 0.00001: # hopefully avoid weird errors with absurd precision
 			self.x = 0
+		self.x = self.x * 10
 		if abs(self.y) > 0 and abs(self.y) < 0.00001:
 			self.y = 0
+		self.y = self.y * 10
 		if abs(self.z) > 0 and abs(self.z) < 0.00001:
 			self.z = 0
+		self.z = self.z * 10
 		test = file.read(12)
 		self.nx, self.ny, self.nz = struct.unpack("<3f", test)
 		if abs(self.nx) > 0 and abs(self.nx) < 0.00001:
