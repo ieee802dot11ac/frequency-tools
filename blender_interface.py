@@ -1,4 +1,4 @@
-def import_dingus(f, fname):
+def import_mesh(f, fname):
 
     import bpy
     from . class_defs import mesh
@@ -11,7 +11,32 @@ def import_dingus(f, fname):
     bmesh.validate()
 
     obj = bpy.data.objects.new(fname, bmesh)
-    bpy.context.collection.objects.link(obj)
+    bpy.context.scene.collection.objects.link(obj)
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
+
+def import_rnd(f, fname):
+
+    import bpy
+    import os
+    from . class_defs import rnd
+    import tempfile as tf
+
+    masterCollection = bpy.context.scene.collection
+    rndCollection = bpy.data.collections.new(fname)
+    masterCollection.children.link(rndCollection)
+
+    tempdir = tf.TemporaryDirectory()
+    rndFile = rnd.RndFile(0, 0, [rnd.RndEntry("","",False)], [b""])
+    rndFile.LoadRndFile(f, False)
+    rndFile.WriteFilesToDir(tempdir.name)
+
+    files = os.listdir(tempdir.name)
+    for filename in files:
+        if ".mesh" in os.path.splitext(filename):
+            import_mesh(open(filename, "rb"), filename)
+            rndCollection.objects.link(bpy.context.object) #link it with collection
+            masterCollection.objects.unlink(bpy.context.object) #unlink it from master collection
+        else:
+            pass
 
