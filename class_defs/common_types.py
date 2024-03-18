@@ -13,6 +13,16 @@ class Sphere:
 		x, y, z, w = struct.unpack("<ffff", file.read(16))
 
 @dataclass
+class Color:
+	r: float
+	g: float
+	b: float
+	a: float
+
+	def __init__(self, file):
+		r, g, b, a = struct.unpack("<4f", file.read(16))
+
+@dataclass
 class Vector3:
 	x: float
 	y: float

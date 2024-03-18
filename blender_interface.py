@@ -15,6 +15,14 @@ def import_mesh(f, fname):
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
 
+def import_light(f, fname):
+
+    import bpy
+    from . class_defs import light
+
+    # blit = bpy.data.lights.new()
+    flit = light.Light(f)
+
 def import_rnd(f, fname):
 
     import bpy
@@ -37,6 +45,10 @@ def import_rnd(f, fname):
             import_mesh(open(filename, "rb"), filename)
             rndCollection.objects.link(bpy.context.object) #link it with collection
             masterCollection.objects.unlink(bpy.context.object) #unlink it from master collection
+        elif ".lit" in os.path.splitext(filename):
+            import_light(open(filename, "rb"), filename)
+            rndCollection.objects.link(bpy.context.object)
+            masterCollection.objects.unlink(bpy.context.object)
         else:
             pass
 
