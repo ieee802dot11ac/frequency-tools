@@ -20,8 +20,22 @@ def import_light(f, fname):
     import bpy
     from . class_defs import light
 
-    # blit = bpy.data.lights.new()
     flit = light.Light(f)
+    typ = ''
+    if flit.mType == 0:
+        typ = 'POINT'
+    elif flit.mType == 1:
+        typ = 'AREA'
+    elif flit.mType == 2:
+        typ = 'SPOT'
+    blit = bpy.data.lights.new(name=fname, type=typ)
+    blit.energy = flit.diffuse.a
+
+    blit_obj = bpy.data.objects.new(name=fname, object_data = blit)
+    bpy.context.scene.collection.objects.link(blit_obj)
+    bpy.context.view_layer.objects.active = blit_obj
+    blit_obj.location = flit.tform.pos
+    bpy.context.evaluated_depsgraph_get().update()
 
 def import_rnd(f, fname):
 

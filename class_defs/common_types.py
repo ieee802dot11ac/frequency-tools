@@ -10,17 +10,17 @@ class Sphere:
 	w: float
 
 	def __init__(self, file):
-		x, y, z, w = struct.unpack("<ffff", file.read(16))
+		self.x, self.y, self.z, self.w = struct.unpack("<ffff", file.read(16))
 
 @dataclass
-class Color:
+class Color4f:
 	r: float
 	g: float
 	b: float
 	a: float
 
 	def __init__(self, file):
-		r, g, b, a = struct.unpack("<4f", file.read(16))
+		self.r, self.g, self.b, self.a = struct.unpack("<4f", file.read(16))
 
 @dataclass
 class Vector3:
@@ -28,7 +28,7 @@ class Vector3:
 	y: float
 	z: float
 	def __init__(self, file):
-		x, y, z = struct.unpack("<fff", file.read(12))
+		self.x, self.y, self.z = struct.unpack("<fff", file.read(12))
 
 @dataclass
 class Matrix3:

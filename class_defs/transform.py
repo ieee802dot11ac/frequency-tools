@@ -23,3 +23,7 @@ class Transform:
         self.trans_ct = struct.unpack("<I", file.read(4))[0]
         self.transes = [utils.readUntilNull(file) for i in range(self.trans_ct)]
         self.pad1, self.pad2, self.pad3, self.pad4 = struct.unpack("<4I", file.read(16))
+
+    @property
+    def pos(self):
+        return (self.local.pos.x + self.world.pos.x, self.local.pos.y + self.world.pos.y, self.local.pos.z + self.world.pos.z)
