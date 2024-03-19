@@ -37,6 +37,20 @@ def import_light(f, fname):
     blit_obj.location = flit.tform.pos
     bpy.context.evaluated_depsgraph_get().update()
 
+def import_cam(f, fname):
+
+    import bpy
+    from . class_defs import cam
+
+    fcam = cam.Cam(f)
+    bcam_data = bpy.data.cameras.new(fname)
+    bcam_data.lens_unit = 'FOV'
+    bcam_data.lens = fcam.fov
+    bcam = bpy.data.objects.new(name=fname, object_data=bcam_data)
+    bcam.location = fcam.trans.pos
+    bpy.context.scene.collection.objects.link(bcam)
+    bpy.context.view_layer.objects.active = bcam
+
 def import_rnd(f, fname):
 
     import bpy
@@ -61,6 +75,10 @@ def import_rnd(f, fname):
             masterCollection.objects.unlink(bpy.context.object) #unlink it from master collection
         elif ".lit" in os.path.splitext(filename):
             import_light(open(filename, "rb"), filename)
+            rndCollection.objects.link(bpy.context.object)
+            masterCollection.objects.unlink(bpy.context.object)
+        elif ".cam" in os.path.splitext(filename):
+            import_cam(open(filename, "rb"), filename)
             rndCollection.objects.link(bpy.context.object)
             masterCollection.objects.unlink(bpy.context.object)
         else:

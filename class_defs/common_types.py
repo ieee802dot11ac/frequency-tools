@@ -22,6 +22,25 @@ class Color4f:
 	def __init__(self, file):
 		self.r, self.g, self.b, self.a = struct.unpack("<4f", file.read(16))
 
+
+@dataclass
+class Rect:
+	x: float
+	y: float
+	w: float
+	h: float
+
+	def __init__(self, file):
+		self.x, self.y, self.w, self.h = struct.unpack("<4f", file.read(16))
+
+
+@dataclass
+class Vector2:
+	x: float
+	y: float
+	def __init__(self, file):
+		self.x, self.y = struct.unpack("<2f", file.read(8))
+
 @dataclass
 class Vector3:
 	x: float
