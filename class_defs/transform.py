@@ -26,4 +26,4 @@ class Transform:
 
     @property
     def pos(self):
-        return (self.local.pos.x + self.world.pos.x, self.local.pos.y + self.world.pos.y, self.local.pos.z + self.world.pos.z)
+        return (self.world.pos.x, self.world.pos.y, self.world.pos.z)

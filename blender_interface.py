@@ -88,10 +88,10 @@ def import_rnd(f, fname):
             import_light(open(filename, "rb"), filename)
             rndCollection.objects.link(bpy.context.object)
             masterCollection.objects.unlink(bpy.context.object)
-        #elif ".cam" in os.path.splitext(filename):
-        #    import_cam(open(filename, "rb"), filename)
-        #    rndCollection.objects.link(bpy.context.object)
-        #    masterCollection.objects.unlink(bpy.context.object)
+        elif ".cam" in os.path.splitext(filename):
+            import_cam(open(filename, "rb"), filename)
+            rndCollection.objects.link(bpy.context.object)
+            masterCollection.objects.unlink(bpy.context.object)
         else:
             pass
 

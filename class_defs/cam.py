@@ -17,9 +17,8 @@ class Cam:
     fov: float
     screen_rect: ct.Rect
     z_range: ct.Vector2
-    target_tex_exists: bool
     target_tex: str
-    y_ratio: float
+    # y_ratio: float # breaks if target_tex
 
     def __init__(self, file):
 
@@ -32,8 +31,6 @@ class Cam:
         self.near_plane, self.far_plane, self.fov = struct.unpack("<3f", file.read(12))
         self.screen_rect = ct.Rect(file)
         self.z_range = ct.Vector2(file)
-        self.target_tex_exists = file.read(1)
-        if (self.target_tex_exists == True):
-            self.target_tex = ut.ReadUntilNull(file)
-        self.y_ratio = struct.unpack("<f", file.read(4))[0]
+        self.target_tex = ut.readUntilNull(file)
+        # self.y_ratio = struct.unpack("<f", file.read(4))[0]
 

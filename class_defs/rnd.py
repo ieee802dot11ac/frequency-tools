@@ -2,7 +2,7 @@ import os
 import struct
 import typing
 from dataclasses import dataclass
-from .. class_defs import utils
+
 @dataclass
 class RndEntry:
 	ftype: str
@@ -10,6 +10,7 @@ class RndEntry:
 	unk_bool: bool
 
 	def Load(self, file):
+		from .. class_defs import utils
 		self.ftype = utils.readUntilNull(file)
 		self.fname = utils.readUntilNull(file)
 		self.unk_bool = file.read(1)
