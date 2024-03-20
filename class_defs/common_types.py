@@ -47,7 +47,11 @@ class Vector3:
 	y: float
 	z: float
 	def __init__(self, file):
-		self.x, self.y, self.z = struct.unpack("<fff", file.read(12))
+		self.x, self.y, self.z = struct.unpack("<3f", file.read(12))
+
+	@property
+	def as_tup(self):
+		return [self.x, self.y, self.z]
 
 @dataclass
 class Matrix3:
@@ -59,6 +63,10 @@ class Matrix3:
 		self.row1 = Vector3(file)
 		self.row2 = Vector3(file)
 		self.row3 = Vector3(file)
+
+	@property
+	def as_dbl_tup(self):
+		return [self.row1.as_tup, self.row2.as_tup, self.row3.as_tup]
 
 @dataclass
 class Xfm:

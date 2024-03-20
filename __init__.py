@@ -65,10 +65,10 @@ class ImportFreqScene(Operator, ImportHelper):
     bl_description = "Import contents of a Rnd scene"
     bl_options = {'UNDO'}
 
-    filename_ext = ".rnd"
+    filename_ext = ".rnd, .rnd.gz"
 
     filter_glob: StringProperty(
-        default="*.rnd",
+        default="*.rnd*",
         options={'HIDDEN'},
     )
 
@@ -84,18 +84,19 @@ class ImportFreqScene(Operator, ImportHelper):
     def execute(self, context):
         import os
         from . import blender_interface as bi
+        from . class_defs import utils
 
         paths = [os.path.join(self.directory, name.name) for name in self.files]
         for path in paths:
             objName = bpy.path.display_name_from_filepath(path)
-            f = open(path, "rb")
+            f = utils.OpenOptionallyCompressed(path)
             bi.import_rnd(f, objName)
 
         return {'FINISHED'}
 
 def menu_import(self, context):
     self.layout.operator(ImportFreqMesh.bl_idname, text="FreQuency mesh (.mesh)")
-    self.layout.operator(ImportFreqScene.bl_idname, text="FreQuency Rnd (.rnd)")
+    self.layout.operator(ImportFreqScene.bl_idname, text="FreQuency Rnd (.rnd, .rnd.gz)")
 
 classes = (
     ImportFreqMesh,
