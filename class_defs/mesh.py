@@ -1,11 +1,20 @@
 import os # nonlocal imports
 import struct
 import typing
-from dataclasses import dataclass # "from _" imports
-from .. class_defs import common_types as ct # local imports
-from .. class_defs import drawable as dr
-from .. class_defs import transform as tf
-from .. class_defs import utils as ut
+from dataclasses import dataclass
+try:
+	from .. class_defs import common_types as ct
+	from .. class_defs import collideable as cl
+	from .. class_defs import drawable as dr
+	from .. class_defs import transform as tf
+	from .. class_defs import utils as ut
+except:
+	print("fuck my liiife")
+	from class_defs import common_types as ct
+	from class_defs import collideable as cl
+	from class_defs import drawable as dr
+	from class_defs import transform as tf
+	from class_defs import utils as ut
 
 @dataclass
 class Face:
@@ -19,6 +28,18 @@ class Face:
 	@property
 	def as_tup(self):
 		return (self.idx0, self.idx1, self.idx2)
+
+@dataclass
+class Edge:
+	idx0: int
+	idx1: int
+
+	def __init__(self, file):
+		self.idx0, self.idx1 = struct.unpack("<2h", file.read(4))
+
+	@property
+	def as_tup(self):
+		return (self.idx0, self.idx1)
 
 @dataclass
 class Vertex:
@@ -81,9 +102,7 @@ class Vertex:
 		if abs(self.weight_3) > 0 and abs(self.weight_3) < 0.00001:
 			self.weight_3 = 0
 
-		test = file.read(8)
-		print(test, file.tell())
-		self.bone_0, self.bone_1, self.bone_2, self.bone_3 = struct.unpack("<4h", test)
+		self.bone_0, self.bone_1, self.bone_2, self.bone_3 = struct.unpack("<4h", file.read(8))
 
 	@property
 	def pos(self):
@@ -137,8 +156,7 @@ class RndMesh:
 	ver: int
 	xfm: tf.Transform # RndTransformable
 	draw: dr.Drawable # RndDrawable
-	bone_ct: int
-	bones: list[str]
+	coll: cl.Collideable
 	zmode1: int
 	zmode2: int
 	mat: str
@@ -150,21 +168,19 @@ class RndMesh:
 	sphere: ct.Sphere
 	unk_str: str
 	unk_flt: float
-	unk_negone: int
+	max_verts: int
 	vert_ct: int
 	verts: list[Vertex]
 	face_ct: int
 	faces: list[Face]
-	short_ct: int
-	shorts: list[int] # 2 * short_ct... why?
+	edge_ct: int
+	edges: list[Edge]
 
 	def __init__(self, file):
 		self.ver = struct.unpack("<I", file.read(4))
 		self.xfm = tf.Transform(file)
 		self.draw = dr.Drawable(file)
-		file.seek(4,1)
-		self.bone_ct = struct.unpack("<I", file.read(4))[0]
-		self.bones = [ut.readUntilNull(file) for i in range(self.bone_ct)]
+		self.coll = cl.Collideable(file)
 		self.zmode1 = struct.unpack("<I", file.read(4))
 		self.zmode2 = struct.unpack("<I", file.read(4))
 		self.mat = ut.readUntilNull(file)
@@ -176,10 +192,10 @@ class RndMesh:
 		self.sphere = ct.Sphere(file)
 		self.unk_str = ut.readUntilNull(file)
 		self.unk_flt = struct.unpack("<f", file.read(4))[0]
-		self.unk_negone = struct.unpack("<I", file.read(4))
+		self.max_verts = struct.unpack("<I", file.read(4))
 		self.vert_ct = struct.unpack("<I", file.read(4))[0]
 		self.verts = [Vertex(file) for j in range(self.vert_ct)]
 		self.face_ct = struct.unpack("<I", file.read(4))[0]
 		self.faces = [Face(file) for k in range(self.face_ct)]
-		self.short_ct = struct.unpack("<I", file.read(4))[0]
-		self.shorts = [struct.unpack("<h", file.read(2)) for l in range(2*self.short_ct)]
+		self.edge_ct = struct.unpack("<I", file.read(4))[0]
+		self.edges = [Edge(file) for l in range(self.edge_ct)]

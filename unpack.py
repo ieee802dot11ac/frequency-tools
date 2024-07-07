@@ -13,7 +13,7 @@ if __name__ == "__main__":
 			filename = sys.argv[1][:-3]
 		else:
 			filename = sys.argv[1]
-		print("Dumping file", sys.argv[1], "to directory _" + filename)
+		print("Dumping file", sys.argv[1], "to directory _" + filename[:-4])
 		outdir = "_" + filename[:-4]
 
 	if len(sys.argv) == 3:

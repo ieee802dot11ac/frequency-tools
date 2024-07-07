@@ -10,7 +10,10 @@ class Collideable:
 
     def __init__(self, file):
 
-        from .. class_defs import utils
+        try:
+            from .. class_defs import utils
+        except:
+            from class_defs import utils
 
         self.ver = struct.unpack("<I", file.read(4))[0]
         self.collide_ct = struct.unpack("<I", file.read(4))[0]

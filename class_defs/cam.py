@@ -1,10 +1,16 @@
 import typing
 import struct
 from dataclasses import dataclass
-from .. class_defs import common_types as ct
-from .. class_defs import transform as tf
-from .. class_defs import drawable as dr
-from .. class_defs import collideable as cl
+try:
+    from .. class_defs import common_types as ct
+    from .. class_defs import transform as tf
+    from .. class_defs import drawable as dr
+    from .. class_defs import collideable as cl
+except:
+    from class_defs import common_types as ct
+    from class_defs import transform as tf
+    from class_defs import drawable as dr
+    from class_defs import collideable as cl
 
 @dataclass
 class Cam:

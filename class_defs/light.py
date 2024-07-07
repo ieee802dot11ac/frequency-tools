@@ -2,12 +2,15 @@ import struct
 import typing
 from dataclasses import dataclass
 
-from .. class_defs import common_types as ct
-from .. class_defs import transform as tf
+try:
+    from .. class_defs import common_types as ct
+    from .. class_defs import transform as tf
+except:
+    from class_defs import common_types as ct
+    from class_defs import transform as tf
 
 @dataclass
 class Light:
-
     ver: int
     tform: tf.Transform
     diffuse: ct.Color4f

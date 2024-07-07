@@ -1,8 +1,12 @@
 import struct
 import typing
 from dataclasses import dataclass
-from .. class_defs import utils
-from .. class_defs import common_types as ct
+try:
+    from .. class_defs import utils
+    from .. class_defs import common_types as ct
+except:
+    from class_defs import utils
+    from class_defs import common_types as ct
 
 @dataclass
 class Transform:
