@@ -10,7 +10,7 @@ class Sphere:
 	r: float
 
 	def __init__(self):
-		pass
+		self.x = self.y = self.z = self.r = 0
 
 	def read(self, file):
 		self.x, self.y, self.z, self.r = struct.unpack("<4f", file.read(16))
@@ -96,6 +96,7 @@ class Matrix3:
 		self.row1 = Vector3()
 		self.row2 = Vector3()
 		self.row3 = Vector3()
+		self.row1.x = self.row2.y = self.row3.z = 1
 
 
 	def read(self, file):

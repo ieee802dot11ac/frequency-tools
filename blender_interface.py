@@ -38,6 +38,8 @@ def export_mesh(f, obj):
     fmesh.xfm.local.pos.x = obj.matrix_local[0][3]
     fmesh.xfm.local.pos.y = obj.matrix_local[1][3]
     fmesh.xfm.local.pos.z = obj.matrix_local[2][3]
+    fmesh.zmode1 = 2
+    fmesh.zmode2 = 1
 
     if obj.material_slots and len(obj.material_slots) > 0:
         material = obj.material_slots[0].material
@@ -49,8 +51,15 @@ def export_mesh(f, obj):
         material_name = ""
 
     fmesh.mat = material_name
-    
-    fmesh.max_verts = -1
+    name = obj.name
+    fmesh.owner = name
+    fmesh.owner2 = name
+    fmesh.parent = name
+    fmesh.trans1 = ""
+    fmesh.trans2 = ""
+    fmesh.next_lod = ""
+    fmesh.min_screen = 0
+    fmesh.max_verts = 4294967295
 
     fmesh.vert_ct = len(bmesh.vertices)
     fmesh.verts = [mesh.Vertex() for _ in range(fmesh.vert_ct)]
@@ -67,18 +76,20 @@ def export_mesh(f, obj):
     bfaces = [p.vertices for p in bmesh.polygons if len(p.vertices) == 3] # thanks comp
     fmesh.face_ct = len(bfaces)
     fmesh.faces = [mesh.Face() for _ in range(fmesh.face_ct)]
-    for i in range(fmesh.edge_ct):
+    for i in range(fmesh.face_ct):
         bf = bfaces[i]
         ff = fmesh.faces[i]
-        ff.idx0 = bf.vertices[0]
-        ff.idx1 = bf.vertices[1]
-        ff.idx2 = bf.vertices[2]
+        ff.idx0 = bf[0]
+        ff.idx1 = bf[1]
+        ff.idx2 = bf[2]
 
     fmesh.edge_ct = len(bmesh.edges)
     fmesh.edges = [mesh.Edge() for _ in range(fmesh.edge_ct)]
     for i in range(fmesh.edge_ct):
         fmesh.edges[i].idx0 = bmesh.edges[i].vertices[0]
         fmesh.edges[i].idx1 = bmesh.edges[i].vertices[1]
+
+    fmesh.write(f)
 
 def import_light(f, fname):
 
