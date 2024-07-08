@@ -21,6 +21,6 @@ if __name__ == "__main__":
 		outdir = sys.argv[2]
 
 	file = utils.OpenOptionallyCompressed(sys.argv[1])
-	rndFile = rnd.RndFile(0, 0, [rnd.RndEntry("","",False)], [b""])
+	rndFile = rnd.RndFile()
 	rndFile.LoadRndFile(file, True)
 	rndFile.WriteFilesToDir(outdir)

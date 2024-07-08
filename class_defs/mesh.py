@@ -9,7 +9,6 @@ try:
 	from .. class_defs import transform as tf
 	from .. class_defs import utils as ut
 except:
-	print("fuck my liiife")
 	from class_defs import common_types as ct
 	from class_defs import collideable as cl
 	from class_defs import drawable as dr
@@ -22,8 +21,14 @@ class Face:
 	idx1: int
 	idx2: int
 
-	def __init__(self, file):
+	def __init__(self):
+		pass
+
+	def read(self, file):
 		self.idx0, self.idx1, self.idx2 = struct.unpack("<3h", file.read(6))
+
+	def write(self, file):
+		file.write(struct.pack("<3h", self.idx0, self.idx1, self.idx2))
 
 	@property
 	def as_tup(self):
@@ -34,8 +39,14 @@ class Edge:
 	idx0: int
 	idx1: int
 
-	def __init__(self, file):
+	def __init__(self):
+		pass
+
+	def read(self, file):
 		self.idx0, self.idx1 = struct.unpack("<2h", file.read(4))
+
+	def write(self, file):
+		file.write(struct.pack("<2h", self.idx0, self.idx1))
 
 	@property
 	def as_tup(self):
@@ -65,7 +76,10 @@ class Vertex:
 	bone_2: int # short
 	bone_3: int # short
 
-	def __init__(self, file):
+	def __init__(self):
+		pass
+
+	def read(self, file):
 		test = file.read(12)
 		self.x, self.y, self.z = struct.unpack("<3f", test)
 		if abs(self.x) > 0 and abs(self.x) < 0.00001: # hopefully avoid weird errors with absurd precision
@@ -103,6 +117,13 @@ class Vertex:
 			self.weight_3 = 0
 
 		self.bone_0, self.bone_1, self.bone_2, self.bone_3 = struct.unpack("<4h", file.read(8))
+
+	def write(self, file):
+		file.write(struct.pack("<3f", self.x, self.y, self.z))
+		file.write(struct.pack("<3f", self.nx, self.ny, self.nz))
+		file.write(struct.pack("<2f", self.u, self.v))
+		file.write(struct.pack("<4f", self.weight_0, self.weight_1, self.weight_2, self.weight_3))
+		file.write(struct.pack("<4h", self.bone_0, self.bone_1, self.bone_2, self.bone_3))
 
 	@property
 	def pos(self):
@@ -166,8 +187,8 @@ class RndMesh:
 	trans1: str
 	trans2: str
 	sphere: ct.Sphere
-	unk_str: str
-	unk_flt: float
+	next_lod: str
+	min_screen: float
 	max_verts: int
 	vert_ct: int
 	verts: list[Vertex]
@@ -176,26 +197,35 @@ class RndMesh:
 	edge_ct: int
 	edges: list[Edge]
 
-	def __init__(self, file):
-		self.ver = struct.unpack("<I", file.read(4))
-		self.xfm = tf.Transform(file)
-		self.draw = dr.Drawable(file)
-		self.coll = cl.Collideable(file)
-		self.zmode1 = struct.unpack("<I", file.read(4))
-		self.zmode2 = struct.unpack("<I", file.read(4))
+	def __init__(self):
+		self.xfm = tf.Transform()
+		self.draw = dr.Drawable()
+		self.coll = cl.Collideable()
+		self.sphere = ct.Sphere()
+
+	def read(self, file):
+		self.ver = struct.unpack("<I", file.read(4))[0]
+		self.xfm.read(file)
+		self.draw.read(file)
+		self.coll.read(file)
+		self.zmode1 = struct.unpack("<I", file.read(4))[0]
+		self.zmode2 = struct.unpack("<I", file.read(4))[0]
 		self.mat = ut.readUntilNull(file)
 		self.owner = ut.readUntilNull(file)
 		self.owner2 = ut.readUntilNull(file)
 		self.parent = ut.readUntilNull(file)
 		self.trans1 = ut.readUntilNull(file)
 		self.trans2 = ut.readUntilNull(file)
-		self.sphere = ct.Sphere(file)
-		self.unk_str = ut.readUntilNull(file)
-		self.unk_flt = struct.unpack("<f", file.read(4))[0]
-		self.max_verts = struct.unpack("<I", file.read(4))
+		self.sphere.read(file)
+		self.next_lod = ut.readUntilNull(file)
+		self.min_screen = struct.unpack("<f", file.read(4))[0]
+		self.max_verts = struct.unpack("<I", file.read(4))[0]
 		self.vert_ct = struct.unpack("<I", file.read(4))[0]
-		self.verts = [Vertex(file) for j in range(self.vert_ct)]
+		self.verts = [Vertex() for j in range(self.vert_ct)]
+		[v.read(file) for v in self.verts]
 		self.face_ct = struct.unpack("<I", file.read(4))[0]
-		self.faces = [Face(file) for k in range(self.face_ct)]
+		self.faces = [Face() for k in range(self.face_ct)]
+		[f.read(file) for f in self.faces]
 		self.edge_ct = struct.unpack("<I", file.read(4))[0]
-		self.edges = [Edge(file) for l in range(self.edge_ct)]
+		self.edges = [Edge() for l in range(self.edge_ct)]
+		[e.read(file) for e in self.edges]

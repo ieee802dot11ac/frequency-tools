@@ -12,9 +12,10 @@ def import_mesh(f, fname):
     from . class_defs import mesh
 
     bmesh = bpy.data.meshes.new(fname)
-    fmesh = mesh.RndMesh(f)
+    fmesh = mesh.RndMesh()
+    fmesh.read(f)
 
-    bmesh.from_pydata([x.pos for x in fmesh.verts], [], [f.as_tup for f in fmesh.faces])
+    bmesh.from_pydata([x.pos for x in fmesh.verts], [e.as_tup for e in fmesh.edges], [f.as_tup for f in fmesh.faces])
 
     bmesh.validate()
 
@@ -29,7 +30,8 @@ def import_light(f, fname):
     import bpy
     from . class_defs import light
 
-    flit = light.Light(f)
+    flit = light.Light()
+    flit.read(f)
     typ = ''
     if flit.mType == 0:
         typ = 'POINT'
@@ -51,7 +53,8 @@ def import_cam(f, fname):
     import bpy
     from . class_defs import cam
 
-    fcam = cam.Cam(f)
+    fcam = cam.Cam()
+    fcam.read(f)
     bcam_data = bpy.data.cameras.new(fname)
     bcam_data.lens_unit = 'FOV'
     bcam_data.lens = fcam.fov
@@ -74,7 +77,7 @@ def import_rnd(f, fname):
     masterCollection.children.link(rndCollection)
 
     tempdir = tf.TemporaryDirectory()
-    rndFile = rnd.RndFile(0, 0, [rnd.RndEntry("","",False)], [b""])
+    rndFile = rnd.RndFile()
     rndFile.LoadRndFile(f, False)
     rndFile.WriteFilesToDir(tempdir.name)
 

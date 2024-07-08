@@ -4,17 +4,29 @@ from dataclasses import dataclass
 
 @dataclass
 class Collideable:
-    ver: int # 0
-    collide_ct: int
-    collides: list[str]
+	ver: int # 0
+	collide_ct: int
+	collides: list[str]
 
-    def __init__(self, file):
+	def __init__(self):
+		pass
 
-        try:
-            from .. class_defs import utils
-        except:
-            from class_defs import utils
+	def read(self, file):
+		try:
+			from .. class_defs import utils
+		except:
+			from class_defs import utils
 
-        self.ver = struct.unpack("<I", file.read(4))[0]
-        self.collide_ct = struct.unpack("<I", file.read(4))[0]
-        self.collides = [utils.readUntilNull(file) for i in range(self.collide_ct)]
+		self.ver = struct.unpack("<I", file.read(4))[0]
+		self.collide_ct = struct.unpack("<I", file.read(4))[0]
+		self.collides = [utils.readUntilNull(file) for i in range(self.collide_ct)]
+
+	def write(self, file):
+		try:
+			from .. class_defs import utils
+		except:
+			from class_defs import utils
+
+		file.write(struct.unpack("<I", self.ver))
+		file.write(struct.unpack("<I", self.collide_ct))
+		[utils.writeCstr(s, file) for s in self.collides]

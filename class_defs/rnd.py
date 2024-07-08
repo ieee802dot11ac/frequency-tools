@@ -1,4 +1,3 @@
-import os
 import struct
 import typing
 from dataclasses import dataclass
@@ -7,9 +6,12 @@ from dataclasses import dataclass
 class RndEntry:
 	ftype: str
 	fname: str
-	unk_bool: bool
+	""" looking in Rnd::Manager::LoadObjects, there appears to be some nonsense about merging
+	rnd entries, which i *think* is gated behind this bool? i genuinely have zero clue, i'm 
+	just always gonna write it as true """
+	unk_bool: bool 
 
-	def Load(self, file):
+	def read(self, file):
 		try:
 			from .. class_defs import utils
 		except:
@@ -17,8 +19,18 @@ class RndEntry:
 
 		self.ftype = utils.readUntilNull(file)
 		self.fname = utils.readUntilNull(file)
-		self.unk_bool = file.read(1)
+		self.unk_bool = struct.unpack("B", file.read(1))[0]
 		print("new file of type", self.ftype, "named", self.fname, "with unk_bool of", self.unk_bool)
+
+	def write(self, file):
+		try:
+			from .. class_defs import utils
+		except:
+			from class_defs import utils
+
+		utils.writeCstr(file, self.ftype)
+		utils.writeCstr(file, self.fname)
+		file.write(struct.pack("<B", self.unk_bool))
 
 @dataclass
 class RndFile:
@@ -27,13 +39,19 @@ class RndFile:
 	entries: list[RndEntry]
 	files: list[bytes]
 
+	def __init__(self):
+		self.ver = 0
+		self.entryCt = 0
+		self.entries = []
+		self.files = []
+
 	def LoadRndFile(self, file, diag: bool):
 		self.ver = struct.unpack_from("<I", file.read(4))[0]
 		self.entryCt = struct.unpack_from("<I", file.read(4))[0]
 		self.entries = [RndEntry("", "", 0) for h in range(self.entryCt)]
 
 		for entry in self.entries:
-			entry.Load(file)
+			entry.read(file)
 
 		remainder = file.read()
 		self.files = remainder.split(b"\xAD\xDE\xAD\xDE")
@@ -42,6 +60,8 @@ class RndFile:
 			print("file ver:", self.ver, "\nfile entries:", self.entryCt, "\nrest of file length:", len(remainder))
 
 	def WriteFilesToDir(self, dir: str) -> None:
+		import os
+
 		if not os.path.exists(dir):
 			os.mkdir(dir)
 
@@ -62,3 +82,16 @@ class RndFile:
 			outFile = open(name, "wb")
 			outFile.write(self.files[i])
 			i += 1
+
+	def WriteMetadata(self, file): 
+		try:
+			from .. class_defs import utils
+		except:
+			from class_defs import utils
+
+		file.write(struct.pack("<I", self.ver))
+		file.write(struct.pack("<I", self.entryCt))
+
+		for entry in self.entries:
+			entry.write(file)
+		# you can do internal file writing yourself, i don't wanna mess with that

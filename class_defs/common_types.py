@@ -9,8 +9,11 @@ class Sphere:
 	z: float
 	w: float
 
-	def __init__(self, file):
-		self.x, self.y, self.z, self.w = struct.unpack("<ffff", file.read(16))
+	def __init__(self):
+		pass
+
+	def read(self, file):
+		self.x, self.y, self.z, self.w = struct.unpack("<4f", file.read(16))
 
 @dataclass
 class Color4f:
@@ -19,8 +22,14 @@ class Color4f:
 	b: float
 	a: float
 
-	def __init__(self, file):
+	def __init__(self):
+		pass
+
+	def read(self, file):
 		self.r, self.g, self.b, self.a = struct.unpack("<4f", file.read(16))
+
+	def write(self, file):
+		file.write(struct.pack("<4f", self.r, self.g, self.b, self.a))
 
 
 @dataclass
@@ -30,7 +39,10 @@ class Rect:
 	w: float
 	h: float
 
-	def __init__(self, file):
+	def __init__(self):
+		pass
+
+	def read(self, file):
 		self.x, self.y, self.w, self.h = struct.unpack("<4f", file.read(16))
 
 
@@ -38,16 +50,30 @@ class Rect:
 class Vector2:
 	x: float
 	y: float
-	def __init__(self, file):
+
+	def __init__(self):
+		pass
+
+	def read(self, file):
 		self.x, self.y = struct.unpack("<2f", file.read(8))
+
+	def write(self, file):
+		file.write(struct.pack("<2f", self.x, self.y))
 
 @dataclass
 class Vector3:
 	x: float
 	y: float
 	z: float
-	def __init__(self, file):
+
+	def __init__(self):
+		pass
+
+	def read(self, file):
 		self.x, self.y, self.z = struct.unpack("<3f", file.read(12))
+
+	def write(self, file):
+		file.write(struct.pack("<3f", self.x, self.y, self.z))
 
 	@property
 	def as_tup(self):
@@ -59,10 +85,21 @@ class Matrix3:
 	row2: Vector3
 	row3: Vector3
 
-	def __init__(self, file):
-		self.row1 = Vector3(file)
-		self.row2 = Vector3(file)
-		self.row3 = Vector3(file)
+	def __init__(self):
+		self.row1 = Vector3()
+		self.row2 = Vector3()
+		self.row3 = Vector3()
+
+
+	def read(self, file):
+		self.row1.read(file)
+		self.row2.read(file)
+		self.row3.read(file)
+
+	def write(self, file):
+		self.row1.write(file)
+		self.row2.write(file)
+		self.row3.write(file)
 
 	@property
 	def as_dbl_tup(self):
@@ -72,7 +109,15 @@ class Matrix3:
 class Xfm:
 	rot: Matrix3
 	pos: Vector3
+	
+	def __init__(self):
+		self.rot = Matrix3()
+		self.pos = Vector3()
 
-	def __init__(self, file):
-		self.rot = Matrix3(file)
-		self.pos = Vector3(file)
+	def read(self, file):
+		self.rot.read(file)
+		self.pos.read(file)
+
+	def write(self, file):
+		self.rot.write(file)
+		self.pos.write(file)

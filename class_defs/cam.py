@@ -26,17 +26,27 @@ class Cam:
     target_tex: str
     # y_ratio: float # breaks if target_tex
 
-    def __init__(self, file):
+    def __init__(self):
+        self.trans = tf.Transform()
+        self.draw = dr.Drawable()
+        self.collid = cl.Collideable()
+        self.screen_rect = ct.Rect()
+        self.z_range = ct.Vector2()
 
-        from .. class_defs import utils as ut
+    def read(self, file):
+
+        try:
+            from .. class_defs import utils as ut
+        except:
+            from class_defs import utils as ut
 
         self.ver = struct.unpack("<I", file.read(4))[0]
-        self.trans = tf.Transform(file)
-        self.draw = dr.Drawable(file)
-        self.collid = cl.Collideable(file)
+        self.trans.read(file)
+        self.draw.read(file)
+        self.collid.read(file)
         self.near_plane, self.far_plane, self.fov = struct.unpack("<3f", file.read(12))
-        self.screen_rect = ct.Rect(file)
-        self.z_range = ct.Vector2(file)
+        self.screen_rect.read(file)
+        self.z_range.read(file)
         self.target_tex = ut.readUntilNull(file)
         # self.y_ratio = struct.unpack("<f", file.read(4))[0]
 

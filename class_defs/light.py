@@ -12,7 +12,7 @@ except:
 @dataclass
 class Light:
     ver: int
-    tform: tf.Transform
+    xfm: tf.Transform
     diffuse: ct.Color4f
     ambient: ct.Color4f
     specular: ct.Color4f
@@ -24,11 +24,11 @@ class Light:
     quadratic_atten: float
     mType: int # enum 0 = point 1 = direc 2 = spot
 
-    def __init__(self, file):
+    def read(self, file):
         self.ver = struct.unpack("<I", file.read(4))[0]
-        self.tform = tf.Transform(file)
-        self.diffuse = ct.Color4f(file)
-        self.ambient = ct.Color4f(file)
-        self.specular = ct.Color4f(file)
+        self.xfm.read(file)
+        self.diffuse.read(file)
+        self.ambient.read(file)
+        self.specular.read(file)
         self.inner_angle, self.outer_angle, self.mRange, self.constant_atten, self.linear_atten, self.quadratic_atten = struct.unpack("<6f", file.read(24))
         self.mType = struct.unpack("<I", file.read(4))[0]
