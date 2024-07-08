@@ -22,7 +22,7 @@ class Face:
 	idx2: int
 
 	def __init__(self):
-		pass
+		idx0 = idx1 = idx2 = 0
 
 	def read(self, file):
 		self.idx0, self.idx1, self.idx2 = struct.unpack("<3h", file.read(6))
@@ -40,7 +40,7 @@ class Edge:
 	idx1: int
 
 	def __init__(self):
-		pass
+		idx0 = idx1 = 0
 
 	def read(self, file):
 		self.idx0, self.idx1 = struct.unpack("<2h", file.read(4))
@@ -76,8 +76,12 @@ class Vertex:
 	bone_2: int # short
 	bone_3: int # short
 
-	def __init__(self):
-		pass
+	def __init__(self): # does this completely ignore the point of the dataclass? kinda! but it was either this or a factory
+		self.x = self.y = self.z = 0
+		self.nx = self.ny = self.nz = 0
+		self.u = self.v = 0
+		self.weight_0 = self.weight_1 = self.weight_2 = self.weight_3 = 0
+		self.bone_0 = self.bone_1 = self.bone_2 = self.bone_3 = 0
 
 	def read(self, file):
 		test = file.read(12)
@@ -173,7 +177,7 @@ class Vertex:
 #};
 
 @dataclass
-class RndMesh:
+class Mesh:
 	ver: int
 	xfm: tf.Transform # RndTransformable
 	draw: dr.Drawable # RndDrawable
@@ -198,6 +202,7 @@ class RndMesh:
 	edges: list[Edge]
 
 	def __init__(self):
+		self.ver = 10
 		self.xfm = tf.Transform()
 		self.draw = dr.Drawable()
 		self.coll = cl.Collideable()
@@ -229,3 +234,27 @@ class RndMesh:
 		self.edge_ct = struct.unpack("<I", file.read(4))[0]
 		self.edges = [Edge() for l in range(self.edge_ct)]
 		[e.read(file) for e in self.edges]
+
+	def write(self, file):
+		file.write(struct.pack("<I", self.ver))
+		self.xfm.write(file)
+		self.draw.write(file)
+		self.coll.write(file)
+		file.write(struct.pack("<I", self.zmode1))
+		file.write(struct.pack("<I", self.zmode2))
+		ut.writeCstr(file, self.mat)
+		ut.writeCstr(file, self.owner)
+		ut.writeCstr(file, self.owner2)
+		ut.writeCstr(file, self.parent)
+		ut.writeCstr(file, self.trans1)
+		ut.writeCstr(file, self.trans2)
+		self.sphere.write(file)
+		ut.writeCstr(file, self.next_lod)
+		file.write(struct.pack("<f", self.min_screen))
+		file.write(struct.pack("<I", self.max_verts))
+		file.write(struct.pack("<I", self.vert_ct))
+		[v.write(file) for v in self.verts]
+		file.write(struct.pack("<I", self.face_ct))
+		[f.write(file) for f in self.faces]
+		file.write(struct.pack("<I", self.edge_ct))
+		[e.write(file) for e in self.edges]

@@ -19,8 +19,12 @@ class Transform:
 	origin: ct.Vector3
 
 	def __init__(self):
+		self.ver = 5
 		self.local = ct.Xfm()
 		self.world = ct.Xfm()
+		self.trans_ct = 0
+		self.transes = []
+		self.billboard = 0
 		self.origin = ct.Vector3()
 
 	def read(self, file):
@@ -34,9 +38,14 @@ class Transform:
 
 	@property
 	def pos(self):
-		return (self.world.pos.x, self.world.pos.y, self.world.pos.z) 
+		return self.world.pos.as_tup()
 
 	def write(self, file):
-		file.write(struct.pack("<I"), self.ver)
+		file.write(struct.pack("<I", self.ver))
 		self.local.write(file)
 		self.world.write(file)
+		file.write(struct.pack("<I", self.trans_ct))
+		[utils.writeCstr(file, s) for s in self.transes]
+		file.write(struct.pack("<I", self.billboard))
+		self.origin.write(file)
+

@@ -7,13 +7,16 @@ class Sphere:
 	x: float
 	y: float
 	z: float
-	w: float
+	r: float
 
 	def __init__(self):
 		pass
 
 	def read(self, file):
-		self.x, self.y, self.z, self.w = struct.unpack("<4f", file.read(16))
+		self.x, self.y, self.z, self.r = struct.unpack("<4f", file.read(16))
+
+	def write(self, file):
+		file.write(struct.pack("<4f", self.x, self.y, self.z, self.r))
 
 @dataclass
 class Color4f:
@@ -67,7 +70,7 @@ class Vector3:
 	z: float
 
 	def __init__(self):
-		pass
+		self.x = self.y = self.z = 0
 
 	def read(self, file):
 		self.x, self.y, self.z = struct.unpack("<3f", file.read(12))
@@ -78,6 +81,10 @@ class Vector3:
 	@property
 	def as_tup(self):
 		return [self.x, self.y, self.z]
+
+	def __repr__(self):
+		return f"\n[ {self.x} {self.y} {self.z} ]"
+
 
 @dataclass
 class Matrix3:
@@ -104,6 +111,9 @@ class Matrix3:
 	@property
 	def as_dbl_tup(self):
 		return [self.row1.as_tup, self.row2.as_tup, self.row3.as_tup]
+
+	def __repr__(self):
+		return f"{self.row1}{self.row2}{self.row3}"
 
 @dataclass
 class Xfm:

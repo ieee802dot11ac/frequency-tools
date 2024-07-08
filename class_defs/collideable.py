@@ -9,7 +9,9 @@ class Collideable:
 	collides: list[str]
 
 	def __init__(self):
-		pass
+		self.ver = 0
+		self.collide_ct = 0
+		self.collides = []
 
 	def read(self, file):
 		try:
@@ -27,6 +29,6 @@ class Collideable:
 		except:
 			from class_defs import utils
 
-		file.write(struct.unpack("<I", self.ver))
-		file.write(struct.unpack("<I", self.collide_ct))
+		file.write(struct.pack("<I", self.ver))
+		file.write(struct.pack("<I", self.collide_ct))
 		[utils.writeCstr(s, file) for s in self.collides]

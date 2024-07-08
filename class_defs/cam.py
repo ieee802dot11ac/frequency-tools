@@ -23,10 +23,12 @@ class Cam:
     fov: float
     screen_rect: ct.Rect
     z_range: ct.Vector2
+    target_tex_exists: bool 
     target_tex: str
-    # y_ratio: float # breaks if target_tex
+    y_ratio: float
 
     def __init__(self):
+        self.ver = 8
         self.trans = tf.Transform()
         self.draw = dr.Drawable()
         self.collid = cl.Collideable()
@@ -34,7 +36,6 @@ class Cam:
         self.z_range = ct.Vector2()
 
     def read(self, file):
-
         try:
             from .. class_defs import utils as ut
         except:
@@ -47,6 +48,10 @@ class Cam:
         self.near_plane, self.far_plane, self.fov = struct.unpack("<3f", file.read(12))
         self.screen_rect.read(file)
         self.z_range.read(file)
-        self.target_tex = ut.readUntilNull(file)
-        # self.y_ratio = struct.unpack("<f", file.read(4))[0]
+        self.target_tex_exists = struct.unpack("<B", file.read(1))[0]
+        if self.target_tex_exists:
+            self.target_tex = ut.readUntilNull(file)
+        else:
+            self.target_tex = ""
+        self.y_ratio = struct.unpack("<f", file.read(4))[0]
 

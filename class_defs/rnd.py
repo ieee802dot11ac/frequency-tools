@@ -40,7 +40,7 @@ class RndFile:
 	files: list[bytes]
 
 	def __init__(self):
-		self.ver = 0
+		self.ver = 6 # note: the 3dsmax plugin we found outputs v5 rnds, TODO figure those out
 		self.entryCt = 0
 		self.entries = []
 		self.files = []
