@@ -11,7 +11,8 @@ class ArkFileEntry:
 	block: int
 	file_size: int
 	inflated_size: int
-	real_address: int
+	fake_file_address: int
+	fake_filename: str
 	data: bytes
 
 	def __init__(self):
@@ -22,7 +23,8 @@ class ArkFileEntry:
 		self.block = 0
 		self.file_size = 0
 		self.inflated_size = 0
-		self.real_address = 0
+		self.fake_file_address = 0
+		self.fake_filename = ""
 		self.data = b''
 
 	def read(self, file):
@@ -35,8 +37,8 @@ class ArkFileEntry:
 		self.inflated_size = struct.unpack("<I", file.read(4))[0]
 
 	def get_data(self, file, blocksize):
-		self.real_address = self.block * blocksize + self.block_off
-		file.seek(self.real_address)
+		self.fake_file_address = self.block * blocksize + self.block_off
+		file.seek(self.fake_file_address)
 		self.data = file.read(self.file_size)
 
 	# TODO impl write
@@ -123,6 +125,8 @@ class ArkFile:
 			entry.read(file)
 
 		for entry in self.file_entries:
+			file.seek(entry.file_name_off)
+			entry.fake_filename = utils.readUntilNull(file)
 			entry.get_data(file, self.block_size)
 
 		file.seek(self.folder_entry_off)
