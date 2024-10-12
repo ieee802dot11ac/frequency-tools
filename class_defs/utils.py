@@ -35,3 +35,9 @@ def OpenOptionallyCompressed(name: str):
 		file = open(filename, "rb")
 	
 	return file
+
+def GetsCompressed(name: str) -> bool:
+	if name.endswith('_bmp.abm') or name.endswith('.rnd'):
+		return True
+	else:
+		return False

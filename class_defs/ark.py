@@ -41,7 +41,9 @@ class ArkFileEntry:
 		file.seek(self.fake_file_address)
 		self.data = file.read(self.file_size)
 
-	# TODO impl write
+	def write(self, file, current_block_count):
+		file.write(struct.pack("<IIHH", self.file_name_hash, self.file_name_off, self.folder_name_idx, self.block_off))
+		file.write(struct.pack("<III", self.block, self.file_size, self.inflated_size))
 
 @dataclass
 class ArkFolderEntry:
@@ -137,3 +139,32 @@ class ArkFile:
 
 		file.seek(self.string_table_off)
 		self.string_table = [utils.readUntilNull(file) for i in range(self.string_ct)]
+
+	def write(self, file):
+		try:
+			from .. class_defs import utils
+		except:
+			from class_defs import utils
+
+		# step 1: generate string table
+		# the root folder is always marked as an empty cstr, so force that
+		self.string_table.append("")
+		for entry in self.folder_entries:
+			self.string_table.append(entry.fake_folder_str)
+
+		for entry in self.file_entries:
+			self.string_table.append(entry.fake_filename)
+
+		# step 2: generate offsets
+		self.folder_entry_off = self.file_entry_off + (self.file_entry_ct * 24)
+		self.string_table_off = self.folder_entry_off + (self.folder_entry_ct * 8)
+
+		# step 3: actually write the base header
+		file.write(struct.pack("<I", self.magic))
+		file.write(struct.pack("<I", self.version))
+		file.write(struct.pack("<I", self.file_entry_off))
+		file.write(struct.pack("<I", self.file_entry_ct))
+		file.write(struct.pack("<I", self.folder_entry_off))
+		file.write(struct.pack("<I", self.folder_entry_ct))
+		file.write(struct.pack("<I", self.string_table_off))
+		file.write(struct.pack("<I", self.string_ct))
