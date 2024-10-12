@@ -147,8 +147,7 @@ class ArkFile:
 			from class_defs import utils
 
 		# step 1: generate string table
-		# the root folder is always marked as an empty cstr, so force that
-		self.string_table.append("")
+		# is this the right way to do it? who knows!
 		for entry in self.folder_entries:
 			self.string_table.append(entry.fake_folder_str)
 
@@ -159,7 +158,7 @@ class ArkFile:
 		self.folder_entry_off = self.file_entry_off + (self.file_entry_ct * 24)
 		self.string_table_off = self.folder_entry_off + (self.folder_entry_ct * 8)
 
-		# step 3: actually write the base header
+		# step 3: write the base header
 		file.write(struct.pack("<I", self.magic))
 		file.write(struct.pack("<I", self.version))
 		file.write(struct.pack("<I", self.file_entry_off))
@@ -168,3 +167,9 @@ class ArkFile:
 		file.write(struct.pack("<I", self.folder_entry_ct))
 		file.write(struct.pack("<I", self.string_table_off))
 		file.write(struct.pack("<I", self.string_ct))
+		file.write(struct.pack("<I", self.total_hdr_size))
+		file.write(struct.pack("<I", self.block_size))
+
+		# step 4: write string table (this makes sense, i promise)
+		file.seek(self.string_table_off)
+		[writeCstr(file, stri) for stri in self.string_table]

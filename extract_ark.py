@@ -25,7 +25,7 @@ if __name__ == "__main__":
 		for i in range(len(archive.folder_entries)):
 			entry = archive.folder_entries[i]
 			file.seek(entry.folder_name_off)
-			if (entry.fake_folder_str == ''):
+			if entry.fake_folder_str == '':
 				print(f"\tFolder {i}: Hash {entry.folder_name_hash}, name offset: {entry.folder_name_off}. This is the root folder.")
 			else:
 				print(f"\tFolder {i}: Hash {entry.folder_name_hash}, name offset: {entry.folder_name_off}, name: {entry.fake_folder_str}")
