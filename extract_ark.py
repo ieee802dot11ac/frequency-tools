@@ -21,6 +21,7 @@ if __name__ == "__main__":
 
 		print(f"There are {len(archive.file_entries)} files in this archive, and {len(archive.folder_entries)} folders.")
 		print(f"The archive itself reports {archive.file_entry_ct} and {archive.folder_entry_ct} entries, respectively.")
+		print(f"Additionally, the string table has a calculated length of {archive.fake_string_table_size}.")
 		print(f"Folders:")
 		for i in range(len(archive.folder_entries)):
 			entry = archive.folder_entries[i]

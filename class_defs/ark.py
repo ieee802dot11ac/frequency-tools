@@ -91,6 +91,41 @@ class ArkFolderEntry:
 		file.write(struct.pack("<2I", self.folder_name_hash, self.folder_name_off))
 
 @dataclass
+class ArkStringTableEntry:
+	string: str
+	fake_file_or_folder_name: bool # true = file
+	fake_offset_from_start_of_strtab: int
+
+	def __init__(self):
+		self.string = ""
+		self.fake_file_or_folder_name = False
+		self.fake_offset_from_start_of_strtab = 0
+
+	def __len__(self) -> int:
+		return len(self.string) + 1
+
+	def add_string_update_size(self, st: str, size: int) -> int:
+		self.string = st
+		return self.update_size(size)
+
+	def read(self, file, strtaboff):
+		try:
+			from .. class_defs import utils
+		except:
+			from class_defs import utils
+			
+		self.fake_offset_from_start_of_strtab = file.tell() - strtaboff
+		self.string = utils.readUntilNull(file)
+
+	def write(self, file):
+		try:
+			from .. class_defs import utils
+		except:
+			from class_defs import utils
+
+		utils.writeCstr(file, self.string)
+
+@dataclass
 class ArkFile:
 	magic: int
 	version: int
@@ -104,7 +139,9 @@ class ArkFile:
 	block_size: int
 	file_entries: list[ArkFileEntry]
 	folder_entries: list[ArkFolderEntry]
-	string_table: list[str]
+	string_table: list[ArkStringTableEntry]
+
+	fake_string_table_size: int
 
 	def __init__(self):
 		self.magic = 0x004B5241 # ARK\0
@@ -120,6 +157,7 @@ class ArkFile:
 		self.file_entries = []
 		self.folder_entries = []
 		self.string_table = []
+		self.fake_string_table_size = 0
 
 	def read(self, file):
 		try:
@@ -157,7 +195,11 @@ class ArkFile:
 			entry.read(file)
 
 		file.seek(self.string_table_off)
-		self.string_table = [utils.readUntilNull(file) for i in range(self.string_ct)]
+		self.string_table = [ArkStringTableEntry() for i in range(self.string_ct)]
+
+		for entry in self.string_table:
+			entry.read(file, self.string_table_off)
+			self.fake_string_table_size += len(entry)
 
 	def write(self, file):
 		try:
@@ -165,12 +207,14 @@ class ArkFile:
 		except:
 			from class_defs import utils
 
-		# step 1: generate string table
+		# step 1: generate string table and hashes
 		# is this the right way to do it? who knows!
 		for entry in self.folder_entries:
+			entry.folder_name_hash = gen_ark_hash(entry.fake_folder_str)
 			self.string_table.append(entry.fake_folder_str)
 
 		for entry in self.file_entries:
+			entry.file_name_hash = gen_ark_hash(entry.fake_filename)
 			self.string_table.append(entry.fake_filename)
 
 		# step 2: generate offsets
@@ -191,4 +235,4 @@ class ArkFile:
 
 		# step 4: write string table (this makes sense, i promise)
 		file.seek(self.string_table_off)
-		[writeCstr(file, stri) for stri in self.string_table]
+		[utils.writeCstr(file, stri) for stri in self.string_table]
