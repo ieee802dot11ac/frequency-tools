@@ -2,6 +2,25 @@ import struct
 import typing
 from dataclasses import dataclass
 
+def gen_ark_hash(string: str) -> int:
+	stri = bytearray(string, "ascii")
+	stri.append(0) # cstr compat
+	c: int = int(stri[0])
+	i: int = 1
+	working1: int = 0
+	working2: int = 0
+	ret: int = 0
+	shift: int = 0
+	while c != 0:
+		c = int(stri[i]) & 0xFF
+		working1 = working2 ^ ((c & 0xFFFF) << shift)
+		working2 = working1 & 0xFFFF
+		ret = working1
+		shift = (shift + 1) & 0x7
+		i += 1
+	return ret & 0xFFFF
+
+
 @dataclass
 class ArkFileEntry:
 	file_name_hash: int
