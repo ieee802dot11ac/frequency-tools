@@ -6,7 +6,6 @@ short arkhash(char* str) {
     unsigned int uVar3 = 0;
     unsigned int shift = 0;
     char c = *str;
-    char* stri = str + 1;
     while (c & 0xFFFFu) {
         c = *str;
         uVar1 = uVar3 ^ (+c & 0xFFFFu) << shift;

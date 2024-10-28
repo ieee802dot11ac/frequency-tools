@@ -6,7 +6,7 @@ def gen_ark_hash(string: str) -> int:
 	stri = bytearray(string, "ascii")
 	stri.append(0) # cstr compat
 	c: int = int(stri[0])
-	i: int = 1
+	i: int = 0
 	working1: int = 0
 	working2: int = 0
 	ret: int = 0
