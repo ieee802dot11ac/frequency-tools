@@ -236,3 +236,10 @@ class ArkFile:
 		# step 4: write string table (this makes sense, i promise)
 		file.seek(self.string_table_off)
 		[utils.writeCstr(file, stri) for stri in self.string_table]
+		assert(file.tell() == self.string_table_off + self.fake_string_table_size)
+
+		# step 5: generate block offsets & assign entries accordingly
+
+		# step 6: actually write blocks to disk
+
+		# step 7: sanity checks
